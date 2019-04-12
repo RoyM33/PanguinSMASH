@@ -1,0 +1,46 @@
+.content {
+    display: grid;
+    text-align: center;
+    grid-template-rows: 80px auto;
+    grid-template-areas: 
+    "Header"
+    "Body";
+    height: calc(100vh - 16px);
+    width: calc(100vw - 16px);
+    padding: 8px;
+}
+
+.header {
+    grid-area: Header;
+}
+
+.body {
+    grid-area: Body;
+    display: grid;
+    background-color: lightgreen;
+    grid-template-columns: 1fr auto 1fr;
+    grid-template-rows: 1fr auto 1fr;
+    grid-template-areas:
+    ". . ."
+    ". Map ."
+    ". . ."
+
+}
+
+.map, .column {    
+    display: grid;
+    background-color: grey;
+}
+
+.map {
+    grid-area: Map;
+    grid-template-columns:  repeat(20, 55px);
+    grid-column-gap: 2px;
+}
+
+.column {
+    grid-template-rows: repeat(20, 55px);
+    grid-row-gap: 2px;
+    grid-auto-flow: row;
+    grid-template-areas: fill;
+}

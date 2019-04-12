@@ -1,0 +1,23 @@
+<!--The content below is only a placeholder and can be replaced.-->
+<div class="content">
+  <div class="header">
+    <marquee>
+      <h1>
+        Welcome to {{ title }}!
+      </h1>
+    </marquee>
+  </div>
+  <div class="body">
+    <div class="leftSide">
+    </div>
+    <div class="map" penguinController>
+      <div *ngFor="let column of MapService.Columns" class="column">
+        <div *ngFor="let row of MapService.Rows">
+          <tile-interpreter [column]="column" [row]="row">
+          </tile-interpreter>
+        </div>
+      </div>
+    </div>
+    <div class="rightSide">
+    </div>
+  </div>

@@ -1,0 +1,14 @@
+.block {
+    background-color: lightblue;
+}
+.floor {
+    background-color: white;
+}
+.penguin {
+    background-color: red;
+}
+
+.block, .penguin, .floor {    
+    height: 100%;
+    width: 100%;
+}
