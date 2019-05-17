@@ -1,6 +1,10 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { MapService } from '../services/map.service';
 import { PenguinControllerDirective } from '../directives/penguin-controller.directive';
+import { TileType } from '../helpers/TileType';
+import { CreatureType } from '../helpers/CreatureType';
+import { Tile } from '../helpers/Tile';
+import { PenguinControllerService } from '../services/penguin-controller.service';
 
 @Component({
   selector: 'tile-interpreter',
@@ -9,26 +13,29 @@ import { PenguinControllerDirective } from '../directives/penguin-controller.dir
 })
 export class TileInterpreterComponent implements OnInit {
 
+  public TileType = TileType;
+  public CreatureType = CreatureType;
+
   @Input('row')
-  public Row: number;
+  public RowIndex: number;
 
   @Input('column')
-  public Column: number;
+  public ColumnIndex: number;
 
-  public FloorStyle: string = '';
-  public CreatureStyle: string = '';
+  public tile: Tile;
+  public CreatureStyle: CreatureType = CreatureType.None;
 
-  constructor(public MapService: MapService, public PenguinController: PenguinControllerDirective) {
+  constructor(public MapService: MapService, private _penguinService: PenguinControllerService) {
   }
 
   ngOnInit() {
-    this.FloorStyle = this.MapService.GetTile(this.Column, this.Row);
-    this.PenguinController.PenguinSubject.subscribe(penguin => {
-      if (penguin.IsHere(this.Column, this.Row)) {
-        this.CreatureStyle = 'penguin';
+    this.tile = this.MapService.GetTileByIndex(this.ColumnIndex, this.RowIndex);
+    this._penguinService.PenguinSubject.subscribe(_ => {
+      if (this._penguinService.IsHere(this.ColumnIndex, this.RowIndex)) {
+        this.CreatureStyle = CreatureType.Panguin;
       }
       else {
-        this.CreatureStyle = '';
+        this.CreatureStyle = CreatureType.None;
       }
     });
   }

@@ -1,82 +1,77 @@
 import { Directive, HostListener } from '@angular/core';
 import { Observable, Subscriber, Subject } from 'rxjs';
 import { MapService } from '../services/map.service';
+import { CreatureType } from '../helpers/CreatureType';
+import { TileType } from '../helpers/TileType';
+import { BlockAIService } from '../services/block-a-i.service';
+import { Direction } from '../helpers/Directions';
+import { PenguinControllerService } from '../services/penguin-controller.service';
 
 @Directive({
   selector: '[penguinController]'
 })
 export class PenguinControllerDirective {
 
-  private _penguin: Penguin;
+  private _currentKey: KeyStroke;
+  //Controls the speed at which the panguin moves while holding a button down.
+  private _timeHasElapsed = false;
 
-
-  public PenguinSubject = new Subject<Penguin>();
-
-  @HostListener('window:keydown.w', ['$event'])
+  @HostListener('document:keydown.w', ['$event'])
   private MoveUpwards() {
-    this._penguin.MoveUp();
-    this.PenguinSubject.next(this._penguin);
+    this.TriggerButton(KeyStroke.W);
   }
 
-  @HostListener('window:keydown.a', ['$event'])
+  @HostListener('document:keydown.a', ['$event'])
   private MoveLeft() {
-    this._penguin.MoveLeft();
-    this.PenguinSubject.next(this._penguin);
+    this.TriggerButton(KeyStroke.A);
   }
 
-  @HostListener('window:keydown.s', ['$event'])
+  public downMoveTimeout: number;
+  public movingDown: boolean;
+  @HostListener('document:keydown.s', ['$event'])
   private MoveDownwards() {
-    this._penguin.MoveDown();
-    this.PenguinSubject.next(this._penguin);
+    this.TriggerButton(KeyStroke.S);
   }
 
-  @HostListener('window:keydown.d', ['$event'])
+  @HostListener('document:keydown.D', ['$event'])
   private MoveRight() {
-    this._penguin.MoveRight();
-    this.PenguinSubject.next(this._penguin);
+    this.TriggerButton(KeyStroke.D);
   }
 
-  constructor(private _mapService: MapService) {
-    this._penguin = new Penguin(this._mapService.MaxIndex);
+  constructor(private _penguinService: PenguinControllerService) {
   }
 
+  public TriggerButton(keyStroke: KeyStroke) {
+    if (keyStroke == this._currentKey) {
+      if (!this._timeHasElapsed)
+        return false;
+    }
+    this._timeHasElapsed = false;
+    this._currentKey = keyStroke;
+    switch (this._currentKey) {
+      case KeyStroke.W:
+        this._penguinService.MoveUp();
+        break;
+      case KeyStroke.A:
+        this._penguinService.MoveLeft();
+        break;
+      case KeyStroke.D:
+        this._penguinService.MoveRight();
+        break;
+      case KeyStroke.S:
+        this._penguinService.MoveDown();
+        break;
+    }
+    window.setTimeout(() => {
+      this._timeHasElapsed = true;
+    }, this._penguinService.MAXSPEED);
+  }
 }
 
-export class Penguin {
-  private _column: number = 5;
-  private _row: number = 5;
-
-  public get Location() {
-    return { Column: this._column, Row: this._row };
-  }
-
-  constructor(private _maxLength: number) {
-
-  }
-
-  public MoveUp() {
-    if (this._row > 0)
-      this._row--;
-  }
-
-  public MoveDown() {
-    if (this._row < this._maxLength)
-      this._row++;
-  }
-
-  public MoveLeft() {
-    if (this._column > 0)
-      this._column--;
-  }
-
-  public MoveRight() {
-    if (this._column < this._maxLength)
-      this._column++;
-  }
-
-  public IsHere(column: number, row: number) {
-    if (this._column == column && this._row == row)
-      return true;
-    return false;
-  }
+enum KeyStroke {
+  none,
+  W,
+  A,
+  S,
+  D
 }

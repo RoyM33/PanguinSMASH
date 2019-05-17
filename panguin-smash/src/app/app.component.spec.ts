@@ -1,12 +1,21 @@
 import { TestBed, async } from '@angular/core/testing';
 import { AppComponent } from './app.component';
+import { MapService } from './services/map.service';
+import { TileInterpreterComponent } from './tile-interpreter/tile-interpreter.component';
+import { CommonModule } from '@angular/common';
+import { PenguinControllerDirective } from './directives/penguin-controller.directive';
 
 describe('AppComponent', () => {
   beforeEach(async(() => {
+    const MockMapService = jasmine.createSpyObj('MapService', ['Columns', 'Rows', 'GenerateNewMap']);
+    MockMapService.Columns = [];
     TestBed.configureTestingModule({
       declarations: [
-        AppComponent
+        AppComponent,
+        TileInterpreterComponent,
+        PenguinControllerDirective
       ],
+      providers: [{ provide: MapService, useValue: MockMapService }]
     }).compileComponents();
   }));
 

@@ -1,14 +1,16 @@
-.block {
+.blockTile {
     background-color: lightblue;
 }
-.floor {
+.floorTile {
     background-color: white;
 }
 .penguin {
     background-color: red;
 }
 
-.block, .penguin, .floor {    
+.blockTile, 
+.penguin,
+ .floorTile {    
     height: 100%;
     width: 100%;
 }

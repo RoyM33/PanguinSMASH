@@ -1,5 +1,7 @@
-<div [ngClass]="[FloorStyle, CreatureStyle]">
-  C: {{Column}}
-  <br>
-  R: {{Row}}
+<div [ngClass]="tile.Classes">
+  <div [ngClass]="{'penguin': CreatureStyle == CreatureType.Panguin}">
+    C: {{tile.columnIndex}}
+    <br>
+    R: {{tile.rowIndex}}
+  </div>
 </div>
