@@ -31,31 +31,27 @@ export class BlockAIService {
     }
 
     if (nextTile.TileType == TileType.Floor) {
-      this.ContinuallyMoveTile(tileInteractingWith, nextTile, direction);
+      var originalTileType = tileInteractingWith.TileType;
+      tileInteractingWith.TileType = TileType.Floor;
       tileInteractingWith.CheckState();
-      this.CheckStateOfNeighbors(tileInteractingWith);
+      this.ContinuallyMoveTile(originalTileType, nextTile, direction);
     }
   }
 
-  private ContinuallyMoveTile(tileMoving: Tile, nextTile: Tile, direction: Direction) {
-    nextTile.TileType = tileMoving.TileType;
-    tileMoving.TileType = TileType.Floor;
-    tileMoving = nextTile;
+  private ContinuallyMoveTile(newTileType: TileType, nextTile: Tile, direction: Direction) {
+    nextTile.TileType = newTileType;
+    let tileMoving = nextTile;
     nextTile = this._mapService.LookAhead(tileMoving.columnIndex, tileMoving.rowIndex, direction);
     if (nextTile && nextTile.TileType == TileType.Floor) {
       setTimeout(() => {
-        this.ContinuallyMoveTile(tileMoving, nextTile, direction);
+        let originalTileType = tileMoving.TileType;
+        tileMoving.TileType = TileType.Floor;
+        this.ContinuallyMoveTile(originalTileType, nextTile, direction);
       }, 120);
     }
     else {
       tileMoving.CheckState();
-      this.CheckStateOfNeighbors(tileMoving);
     }
-  }
-
-  private CheckStateOfNeighbors(tile: Tile) {
-    var neighbors = this._mapService.LookInEveryDirection(tile);
-    neighbors.forEach(tile => { console.log(tile); tile.CheckState(); });
   }
 
   // private LookAhead(tile: Tile, direction: Direction, currentlyMoving: boolean) {

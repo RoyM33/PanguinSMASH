@@ -72,6 +72,7 @@ describe('Tile', () => {
             tile.CheckState();
             expect(tile.State).toEqual(TileState.Blinking);
         });
+
         it('should not be blinking when moved from next to diamond', () => {
             let tile = MockMapService.GetTileByIndex(2, 2);
             tile.TileType = TileType.DiamondBlock;
