@@ -7,8 +7,8 @@ import { PenguinControllerDirective } from './directives/penguin-controller.dire
 
 describe('AppComponent', () => {
   beforeEach(async(() => {
-    const MockMapService = jasmine.createSpyObj('MapService', ['Columns', 'Rows', 'GenerateNewMap']);
-    MockMapService.Columns = [];
+    const MockMapService = new MapService();
+    MockMapService.GenerateNewMap(10, 10);
     TestBed.configureTestingModule({
       declarations: [
         AppComponent,
@@ -31,7 +31,7 @@ describe('AppComponent', () => {
     expect(app.title).toEqual('panguin-smash');
   });
 
-  it('should render title in a h1 tag', () => {
+  it('should render title in  a h1 tag', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.debugElement.nativeElement;

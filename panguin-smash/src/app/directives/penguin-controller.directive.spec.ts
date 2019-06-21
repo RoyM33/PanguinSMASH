@@ -13,9 +13,9 @@ describe('PenguinControllerDirective', () => {
   let component: TestPenguinComponent;
   let MockPenguinControllerService: jasmine.SpyObj<PenguinControllerService>;
   beforeEach(async(() => {
-    const MockMapService = jasmine.createSpyObj('MapService', ['Columns', 'Rows', 'GenerateNewMap']);
-    const MockBlockAIService = jasmine.createSpyObj('BlockAIService', ['CheckBlock']);
-    MockPenguinControllerService = jasmine.createSpyObj<PenguinControllerService>(['MoveUp', 'MoveDown', 'MoveLeft', 'MoveRight']);
+    const MockMapService = jasmine.createSpyObj<MapService>(['Columns', 'Rows', 'GenerateNewMap']);
+    const MockBlockAIService = jasmine.createSpyObj<BlockAIService>(['PenguinInteraction']);
+    MockPenguinControllerService = jasmine.createSpyObj<PenguinControllerService>(['InteractUp', 'InteractDown', 'InteractLeft', 'InteractRight']);
     directionMoved = Direction.none;
     TestBed.configureTestingModule({
       declarations: [TestPenguinComponent, PenguinControllerDirective],
@@ -34,22 +34,22 @@ describe('PenguinControllerDirective', () => {
   });
 
   it('should Move up', (done) => {
-    MockPenguinControllerService.MoveUp.and.callFake(done);
+    MockPenguinControllerService.InteractUp.and.callFake(done);
     component.PenguinDirective.MoveUpwards();
   });
 
   it('should Move down', (done) => {
-    MockPenguinControllerService.MoveDown.and.callFake(done);
+    MockPenguinControllerService.InteractDown.and.callFake(done);
     component.PenguinDirective.MoveDownwards();
   });
 
   it('should Move left', (done) => {
-    MockPenguinControllerService.MoveLeft.and.callFake(done);
+    MockPenguinControllerService.InteractLeft.and.callFake(done);
     component.PenguinDirective.MoveLeft();
   });
 
   it('should Move right', (done) => {
-    MockPenguinControllerService.MoveRight.and.callFake(done);
+    MockPenguinControllerService.InteractRight.and.callFake(done);
     component.PenguinDirective.MoveRight();
   });
 

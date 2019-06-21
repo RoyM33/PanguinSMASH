@@ -38,6 +38,7 @@ export class TileInterpreterComponent implements OnInit {
         this.CreatureStyle = CreatureType.None;
       }
     });
+    this._penguinService.SpawnPenguin();
   }
 
 }

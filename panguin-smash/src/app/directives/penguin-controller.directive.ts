@@ -50,16 +50,16 @@ export class PenguinControllerDirective {
     this._currentKey = keyStroke;
     switch (this._currentKey) {
       case KeyStroke.W:
-        this._penguinService.MoveUp();
+        this._penguinService.InteractUp();
         break;
       case KeyStroke.A:
-        this._penguinService.MoveLeft();
+        this._penguinService.InteractLeft();
         break;
       case KeyStroke.D:
-        this._penguinService.MoveRight();
+        this._penguinService.InteractRight();
         break;
       case KeyStroke.S:
-        this._penguinService.MoveDown();
+        this._penguinService.InteractDown();
         break;
     }
     window.setTimeout(() => {

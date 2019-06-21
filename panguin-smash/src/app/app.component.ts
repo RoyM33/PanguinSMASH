@@ -10,6 +10,6 @@ export class AppComponent {
   title = 'panguin-smash';
 
   constructor(public MapService: MapService) {
-    MapService.GenerateNewMap();
+    MapService.GenerateNewMap(13, 15);
   }
 }

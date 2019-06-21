@@ -1,78 +1,74 @@
 import { TileType } from './TileType';
 import { MapService } from '../services/map.service';
-import { Direction } from './Directions';
+import { TileState } from './TileState';
 
 export class Tile {
     private _tileType: TileType = TileType.Floor;
     private _blinkingInterval: number;
+    private _blinkTimeSpeed = 160;
     private _glow = false;
 
-    public get tileType() {
+    public get TileType() {
         return this._tileType;
     }
-    public set tileType(tileType: TileType) {
+    public set TileType(tileType: TileType) {
         this._tileType = tileType;
         this.PopulateClasses();
     }
 
-
     public Classes: string[] = [];
+    private _state: TileState = TileState.None;
+    public get State() {
+        return this._state;
+    }
+    public set State(state: TileState) {
+        if (state != this._state) {
+            this._state = state;
+            this.StateHasChanged();
+        }
+    }
 
     constructor(private _mapService: MapService, public columnIndex: number, public rowIndex: number) {
         this.PopulateClasses();
     }
 
+    public CheckState() {
+        if (this.TileType == TileType.DiamondBlock) {
+            if (this.TouchingDiamondTile()) {
+                this.State = TileState.Blinking;
+                return;
+            }
+        }
 
-    public Clear() {
-        this.tileType = TileType.Floor;
-        this._glow = false;
-        this.StopBlinking();
+        this.State = TileState.None;
     }
 
-    public CheckNearbyTiles(checkNeighbor: boolean = true) {
-        if (this.tileType != TileType.DiamondBlock)
-            return;
+    public TouchingDiamondTile() {
+        let surroundingTiles = this._mapService.LookInEveryDirection(this);
+        let touchingDiamondTiles = surroundingTiles.filter(tile => tile.TileType == TileType.DiamondBlock).length > 0;
+        if (touchingDiamondTiles)
+            return true;
 
-        let shouldGlow = false;
-        const northTile = this._mapService.LookAhead(this.columnIndex, this.rowIndex, Direction.up, 1);
-        if (northTile && northTile.tileType == TileType.DiamondBlock) {
-            shouldGlow = true;
-            if (checkNeighbor)
-                northTile.CheckNearbyTiles(false);
-        }
+        return false;
+    }
 
-        const southTile = this._mapService.LookAhead(this.columnIndex, this.rowIndex, Direction.down, 1);
-        if (southTile && southTile.tileType == TileType.DiamondBlock) {
-            shouldGlow = true;
-            if (checkNeighbor)
-                southTile.CheckNearbyTiles(false);
-        }
-
-        const eastTile = this._mapService.LookAhead(this.columnIndex, this.rowIndex, Direction.right, 1);
-        if (eastTile && eastTile.tileType == TileType.DiamondBlock) {
-            shouldGlow = true;
-            if (checkNeighbor)
-                eastTile.CheckNearbyTiles(false);
-        }
-
-        const westTile = this._mapService.LookAhead(this.columnIndex, this.rowIndex, Direction.left, 1);
-        if (westTile && westTile.tileType == TileType.DiamondBlock) {
-            shouldGlow = true;
-            if (checkNeighbor)
-                westTile.CheckNearbyTiles(false);
-        }
-
-        if (shouldGlow)
+    private StateHasChanged() {
+        if (this.State == TileState.Blinking)
             this.BeginBlinking();
         else
             this.StopBlinking();
+
+        this._mapService.LookInEveryDirection(this).forEach(tile => tile.CheckState());
     }
 
     private BeginBlinking() {
+        if (this._blinkingInterval)
+            window.clearInterval(this._blinkingInterval);
+
         this._blinkingInterval = window.setInterval(() => {
             this._glow = !this._glow;
             this.PopulateClasses();
-        }, 160);
+        }, this._blinkTimeSpeed);
     }
 
     private StopBlinking() {
@@ -81,13 +77,14 @@ export class Tile {
 
         this._blinkingInterval = null;
         this._glow = false;
+        this.PopulateClasses();
     }
 
     private PopulateClasses() {
         var result = [];
-        if (this.tileType == TileType.Floor)
+        if (this.TileType == TileType.Floor)
             result.push("floorTile");
-        if (this.tileType == TileType.Block)
+        if (this.TileType == TileType.Block)
             result.push("blockTile");
 
         if (this._glow)
