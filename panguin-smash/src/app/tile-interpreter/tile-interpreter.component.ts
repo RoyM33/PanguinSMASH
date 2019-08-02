@@ -5,6 +5,10 @@ import { TileType } from '../helpers/TileType';
 import { CreatureType } from '../helpers/CreatureType';
 import { Tile } from '../helpers/Tile';
 import { PenguinControllerService } from '../services/penguin-controller.service';
+import { SubjectContainerService } from '../services/subject-container.service';
+import { ILocation } from '../interfaces/ILocation';
+import { SnobeeControllerService } from '../services/snobee-controller.service';
+import { GameControllerService } from '../services/game-controller.service';
 
 @Component({
   selector: 'tile-interpreter',
@@ -25,20 +29,50 @@ export class TileInterpreterComponent implements OnInit {
   public tile: Tile;
   public CreatureStyle: CreatureType = CreatureType.None;
 
-  constructor(public MapService: MapService, private _penguinService: PenguinControllerService) {
+  constructor(public MapService: MapService, private _subjectContainer: SubjectContainerService, private _gameController: GameControllerService) {
+
   }
 
   ngOnInit() {
     this.tile = this.MapService.GetTileByIndex(this.ColumnIndex, this.RowIndex);
-    this._penguinService.PenguinSubject.subscribe(_ => {
-      if (this._penguinService.IsHere(this.ColumnIndex, this.RowIndex)) {
-        this.CreatureStyle = CreatureType.Panguin;
-      }
-      else {
-        this.CreatureStyle = CreatureType.None;
-      }
+    this._subjectContainer.PenguinSubject.subscribe(penguinLocation => {
+      this.CheckForPanguin(penguinLocation);
     });
-    this._penguinService.SpawnPenguin();
+    this._subjectContainer.SnobeeSubject.subscribe(snobeeLocations => {
+      this.CheckForSnobee(snobeeLocations);
+    });
   }
 
+  private CheckForPanguin(panguinLocation: ILocation) {
+    let shouldChange = this.tile.TileType == TileType.Panguin;
+    if (!panguinLocation) {
+      if (shouldChange)
+        this.tile.TileType = TileType.Block;
+      return;
+    }
+    if (panguinLocation.Column == this.ColumnIndex && panguinLocation.Row == this.RowIndex) {
+      this.tile.TileType = TileType.Panguin;
+    }
+    else if (shouldChange) {
+      this.tile.TileType = TileType.Floor;
+    }
+  }
+
+  private CheckForSnobee(snobeeLocations: ILocation[]) {
+    let shouldChange = this.tile.TileType == TileType.Snobee;
+    if (!snobeeLocations) {
+      if (shouldChange)
+        this.tile.TileType = TileType.Block;
+      return;
+    }
+    for (var index = 0; index < snobeeLocations.length; index++) {
+      const snobee = snobeeLocations[index];
+      if (snobee.Column == this.ColumnIndex && snobee.Row == this.RowIndex) {
+        this.tile.TileType = TileType.Snobee;
+      }
+      else if (shouldChange) {
+        this.tile.TileType = TileType.Floor;
+      }
+    }
+  }
 }

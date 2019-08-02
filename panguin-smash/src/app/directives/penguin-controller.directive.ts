@@ -1,10 +1,4 @@
 import { Directive, HostListener } from '@angular/core';
-import { Observable, Subscriber, Subject } from 'rxjs';
-import { MapService } from '../services/map.service';
-import { CreatureType } from '../helpers/CreatureType';
-import { TileType } from '../helpers/TileType';
-import { BlockAIService } from '../services/block-a-i.service';
-import { Direction } from '../helpers/Directions';
 import { PenguinControllerService } from '../services/penguin-controller.service';
 
 @Directive({

@@ -28,36 +28,35 @@ describe('BlockAIService', () => {
 
     it('should destroy blocks when next block is not floor', () => {
 
-      var tiles: Tile[] = (<any>MockMapService)._tiles;
+      let tiles: Tile[] = MockMapService.Tiles;
       tiles.forEach(tile => {
         tile.TileType = TileType.Block;
       });
-      AiService.PenguinInteraction(0, 0, Direction.right);
-      console.log(MockMapService.GetTileByIndex(1, 0))
+      AiService.PenguinInteraction(tiles[1], Direction.right);
       expect(MockMapService.GetTileByIndex(1, 0).TileType).toEqual(TileType.Floor);
     });
 
     it('should move blocks when next block is floor', () => {
 
-      var tiles: Tile[] = (<any>MockMapService)._tiles;
+      let tiles: Tile[] = MockMapService.Tiles;
       tiles.forEach(tile => {
         tile.TileType = TileType.Block;
       });
       tiles[2].TileType = TileType.Floor;
-      AiService.PenguinInteraction(0, 0, Direction.right);
+      AiService.PenguinInteraction(tiles[1], Direction.right);
       expect(MockMapService.GetTileByIndex(1, 0).TileType).toEqual(TileType.Floor);
       expect(MockMapService.GetTileByIndex(2, 0).TileType).toEqual(TileType.Block);
     });
 
     it('should move blocks until runs into another block', fakeAsync(() => {
 
-      var tiles: Tile[] = (<any>MockMapService)._tiles;
+      let tiles: Tile[] = MockMapService.Tiles;
       tiles.forEach(tile => {
         tile.TileType = TileType.Block;
       });
       tiles[2].TileType = TileType.Floor;
       tiles[3].TileType = TileType.Floor;
-      AiService.PenguinInteraction(0, 0, Direction.right);
+      AiService.PenguinInteraction(tiles[1], Direction.right);
       expect(MockMapService.GetTileByIndex(1, 0).TileType).toEqual(TileType.Floor);
       tick(121);
       expect(MockMapService.GetTileByIndex(2, 0).TileType).toEqual(TileType.Floor);
@@ -67,40 +66,41 @@ describe('BlockAIService', () => {
 
     it('should not destroy diamond blocks if next block is not floor', () => {
 
-      var tiles: Tile[] = (<any>MockMapService)._tiles;
+      let tiles: Tile[] = MockMapService.Tiles;
       tiles.forEach(tile => {
         tile.TileType = TileType.Block;
       });
       tiles[1].TileType = TileType.DiamondBlock;
-      AiService.PenguinInteraction(0, 0, Direction.right);
+      AiService.PenguinInteraction(tiles[1], Direction.right);
       expect(MockMapService.GetTileByIndex(1, 0).TileType).toEqual(TileType.DiamondBlock);
     });
 
     it('should destroy blocks if edge of map', () => {
-      var tiles: Tile[] = (<any>MockMapService)._tiles;
+      let tiles: Tile[] = MockMapService.Tiles;
       tiles.forEach(tile => {
         tile.TileType = TileType.Block;
       });
-      AiService.PenguinInteraction(8, 0, Direction.right);
+      let tile = MockMapService.GetTileByIndex(9, 0);
+      AiService.PenguinInteraction(tile, Direction.right);
       expect(MockMapService.GetTileByIndex(9, 0).TileType).toEqual(TileType.Floor);
     });
 
     it('should check state of initial block', fakeAsync(() => {
-      var tiles: Tile[] = (<any>MockMapService)._tiles;
+      let tiles: Tile[] = MockMapService.Tiles;
       tiles.forEach(tile => {
         tile.TileType = TileType.Block;
       });
       tiles[2].TileType = TileType.Floor;
       tiles[3].TileType = TileType.Floor;
       MockMapService.GetTileByIndex(1, 0).State = TileState.Blinking;
-      AiService.PenguinInteraction(0, 0, Direction.right);
+      AiService.PenguinInteraction(tiles[1], Direction.right);
       tick(300);
       expect(MockMapService.GetTileByIndex(1, 0).State).toEqual(TileState.None);
     }));
 
     it('should check state of ending block', () => {
 
-      var tiles: Tile[] = (<any>MockMapService)._tiles;
+      let tiles: Tile[] = MockMapService.Tiles;
       tiles.forEach(tile => {
         tile.TileType = TileType.Block;
       });
@@ -111,7 +111,7 @@ describe('BlockAIService', () => {
       tiles[1].TileType = TileType.DiamondBlock;
 
       jasmine.clock().install();
-      AiService.PenguinInteraction(0, 0, Direction.right);
+      AiService.PenguinInteraction(tiles[1], Direction.right);
       jasmine.clock().tick(300);
       jasmine.clock().uninstall();
       expect(MockMapService.GetTileByIndex(3, 0).State).toEqual(TileState.Blinking);
@@ -119,12 +119,13 @@ describe('BlockAIService', () => {
 
     it('should check state of neighbor blocks', () => {
 
-      var tiles: Tile[] = (<any>MockMapService)._tiles;
+      let tiles: Tile[] = MockMapService.Tiles;
       tiles.forEach(tile => {
         tile.TileType = TileType.Block;
       });
       //the block to move
-      MockMapService.GetTileByIndex(1, 1).TileType = TileType.DiamondBlock;
+      let tileToMove = MockMapService.GetTileByIndex(1, 1);
+      tileToMove.TileType = TileType.DiamondBlock;
       //the row of floor tiles
       MockMapService.GetTileByIndex(1, 2).TileType = TileType.Floor;
       MockMapService.GetTileByIndex(1, 3).TileType = TileType.Floor;
@@ -136,7 +137,7 @@ describe('BlockAIService', () => {
       MockMapService.GetTileByIndex(1, 6).TileType = TileType.DiamondBlock;
 
       jasmine.clock().install();
-      AiService.PenguinInteraction(1, 0, Direction.down);
+      AiService.PenguinInteraction(tileToMove, Direction.down);
       jasmine.clock().tick(1800);
       jasmine.clock().uninstall();
       expect(MockMapService.GetTileByIndex(0, 5).State).toEqual(TileState.Blinking);
@@ -145,12 +146,13 @@ describe('BlockAIService', () => {
     });
 
     it('should check state of starting neighbor blocks', () => {
-      var tiles: Tile[] = (<any>MockMapService)._tiles;
+      let tiles: Tile[] = MockMapService.Tiles;
       tiles.forEach(tile => {
         tile.TileType = TileType.Block;
       });
       //the block to move
-      MockMapService.GetTileByIndex(2, 2).TileType = TileType.DiamondBlock;
+      let tileToMove = MockMapService.GetTileByIndex(2, 2);
+      tileToMove.TileType = TileType.DiamondBlock;
       //the row of floor tiles
       MockMapService.GetTileByIndex(3, 2).TileType = TileType.Floor;
       MockMapService.GetTileByIndex(4, 2).TileType = TileType.Floor;
@@ -168,11 +170,14 @@ describe('BlockAIService', () => {
       leftBlock.State = TileState.Blinking;
 
       jasmine.clock().install();
-      AiService.PenguinInteraction(1, 2, Direction.right);
+      AiService.PenguinInteraction(tileToMove, Direction.right);
       jasmine.clock().tick(1800);
       jasmine.clock().uninstall();
+      topBlock = MockMapService.GetTileByIndex(2, 3);
       expect(topBlock.State).toEqual(TileState.None);
+      bottomBlock = MockMapService.GetTileByIndex(2, 1);
       expect(bottomBlock.State).toEqual(TileState.None);
+      leftBlock = MockMapService.GetTileByIndex(1, 2);
       expect(leftBlock.State).toEqual(TileState.None);
     });
   });

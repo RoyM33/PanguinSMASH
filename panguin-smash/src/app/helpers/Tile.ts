@@ -44,12 +44,16 @@ export class Tile {
     }
 
     public TouchingDiamondTile() {
-        let surroundingTiles = this._mapService.LookInEveryDirection(this);
+        let surroundingTiles = this._mapService.LookInEveryDirection(this).map(item => item.Tile);
         let touchingDiamondTiles = surroundingTiles.filter(tile => tile.TileType == TileType.DiamondBlock).length > 0;
         if (touchingDiamondTiles)
             return true;
 
         return false;
+    }
+
+    public CanSpawnPenguin() {
+        return this.TileType == TileType.Floor;
     }
 
     private StateHasChanged() {
@@ -58,7 +62,7 @@ export class Tile {
         else
             this.StopBlinking();
 
-        this._mapService.LookInEveryDirection(this).forEach(tile => tile.CheckState());
+        this._mapService.LookInEveryDirection(this).map(item => item.Tile).forEach(tile => tile.CheckState());
     }
 
     private BeginBlinking() {
@@ -86,6 +90,10 @@ export class Tile {
             result.push("floorTile");
         if (this.TileType == TileType.Block)
             result.push("blockTile");
+        if (this.TileType == TileType.Panguin)
+            result.push("penguin");
+        if (this.TileType == TileType.Snobee)
+            result.push("snobee");
 
         if (this._glow)
             result.push("penguin");

@@ -6,8 +6,9 @@ import { CommonModule } from '@angular/common';
 import { PenguinControllerDirective } from './directives/penguin-controller.directive';
 
 describe('AppComponent', () => {
-  beforeEach(async(() => {
+  beforeEach(async(async () => {
     const MockMapService = new MapService();
+    MockMapService.mapGenerationSpeed = 5;
     MockMapService.GenerateNewMap(10, 10);
     TestBed.configureTestingModule({
       declarations: [

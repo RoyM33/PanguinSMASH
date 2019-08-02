@@ -6,11 +6,15 @@ import { MapService } from './map.service';
 import { Tile } from '../helpers/Tile';
 import { TileType } from '../helpers/TileType';
 import { AssertNotNull } from '@angular/compiler';
+import { SubjectContainerService } from './subject-container.service';
+import { Subject, ReplaySubject } from 'rxjs';
+import { ILocation } from '../interfaces/ILocation';
 
 describe('PenguinControllerService', () => {
   let service: PenguinControllerService;
   let MockMapService: jasmine.SpyObj<MapService>;
   let MockBlockAIService: jasmine.SpyObj<BlockAIService>;
+  let MockSubjectContainerService: jasmine.SpyObj<SubjectContainerService>;
 
   beforeEach(async(() => {
     MockMapService = jasmine.createSpyObj<MapService>(['Columns', 'Rows', 'GenerateNewMap', 'LookAhead', 'GetTileByIndex', 'LookInEveryDirection']);
@@ -24,13 +28,17 @@ describe('PenguinControllerService', () => {
     (<any>MockMapService).rowLength = 15;
     (<any>MockMapService).columnLength = 15;
     MockBlockAIService = jasmine.createSpyObj('BlockAIService', ['PenguinInteraction']);
+
+    MockSubjectContainerService = jasmine.createSpyObj<SubjectContainerService>(["PenguinSubject"])
+    MockSubjectContainerService.PenguinSubject = new ReplaySubject<ILocation>();
+
     TestBed.configureTestingModule({
       providers: [
         { provide: MapService, useValue: MockMapService },
         { provide: BlockAIService, useValue: MockBlockAIService }]
     });
 
-    service = new PenguinControllerService(MockMapService, MockBlockAIService);
+    service = new PenguinControllerService(MockMapService, MockBlockAIService, MockSubjectContainerService);
   }));
 
   it('should be created', () => {
@@ -165,6 +173,7 @@ describe('PenguinControllerService', () => {
       service.InteractLeft();
       expect(service.Location.Column).toEqual(startingColumn);
     });
+
     it('should check next block if not able to move', (done) => {
       MockBlockAIService.PenguinInteraction.and.callFake(() => {
         done();
@@ -248,11 +257,11 @@ describe('PenguinControllerService', () => {
     it('should Only Spawn Penguin on FloorTiles', () => {
       const mapService = new MapService();
       mapService.GenerateNewMap(3, 3);
-      let tiles: Tile[] = (<any>mapService)._tiles;
+      let tiles: Tile[] = mapService.Tiles;
       tiles.forEach(tile => tile.TileType == TileType.Floor);
       tiles[0].TileType = TileType.Floor;
 
-      var service = new PenguinControllerService(mapService, MockBlockAIService);
+      var service = new PenguinControllerService(mapService, MockBlockAIService, MockSubjectContainerService);
       service.SpawnPenguin(1, 1);
       var spawnedTile = mapService.GetTileByIndex(service.Location.Column, service.Location.Row);
       expect(spawnedTile.TileType).toEqual(TileType.Floor);

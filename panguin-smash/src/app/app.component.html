@@ -10,7 +10,7 @@
   <div class="body">
     <div class="leftSide">
     </div>
-    <div class="map" penguinController>
+    <div class="map" penguinController *ngIf="!Loading">
       <div *ngFor="let column of MapService.Columns" class="column">
         <div *ngFor="let row of MapService.Rows">
           <tile-interpreter [column]="column" [row]="row">

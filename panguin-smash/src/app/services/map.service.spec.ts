@@ -18,54 +18,59 @@ describe('MapService', () => {
   });
 
   describe('Generate new Map', () => {
-    it('should populate all the tiles', () => {
+    it('should populate all the tiles', async () => {
       var rowLength = 7;
       var columnLength = 6;
 
       const mapService = new MapService();
-      mapService.GenerateNewMap(columnLength, rowLength);
-      expect((<any>mapService)._tiles.length).toEqual(rowLength * columnLength);
+      await mapService.GenerateNewMap(columnLength, rowLength);
+      expect(mapService.Tiles.length).toEqual(rowLength * columnLength);
     });
-    it('should generate only 3 diamond tiles', () => {
+    it('should generate only 3 diamond tiles', async () => {
 
       const mapService = new MapService();
-      mapService.GenerateNewMap(23, 18);
-      let tiles: Tile[] = (<any>mapService)._tiles;
+      mapService.mapGenerationSpeed = 1;
+      await mapService.GenerateNewMap(23, 18);
+      let tiles: Tile[] = mapService.Tiles;
       var diamondTiles = tiles.filter(item => item.TileType == TileType.DiamondBlock);
       expect(diamondTiles.length).toEqual(3);
     });
-    it('should not generate diamond tiles on the edge', () => {
+    it('should not generate diamond tiles on the edge', async () => {
       var rowLength = 2;
       var columnLength = 2;
 
       const mapService = new MapService();
-      mapService.GenerateNewMap(columnLength, rowLength);
-      let tiles: Tile[] = (<any>mapService)._tiles;
+      await mapService.GenerateNewMap(columnLength, rowLength);
+      let tiles: Tile[] = mapService.Tiles;
       var diamondTiles = tiles.filter(item => item.TileType == TileType.DiamondBlock);
       expect(diamondTiles.length).toEqual(0);
     });
-    it('should generate diamonds if less then 3 available', () => {
+    it('should generate diamonds if less then 3 available', async () => {
       var rowLength = 3;
       var columnLength = 3;
 
       const mapService = new MapService();
-      mapService.GenerateNewMap(columnLength, rowLength);
+      mapService.mapGenerationSpeed = 1;
+      await mapService.GenerateNewMap(columnLength, rowLength);
 
-      let tiles: Tile[] = (<any>mapService)._tiles;
+      let tiles: Tile[] = mapService.Tiles;
       var diamondTiles = tiles.filter(item => item.TileType == TileType.DiamondBlock);
       expect(diamondTiles.length).toEqual(1);
     });
-    it('should not generate diamonds next to each other', () => {
-      var rowLength = 4;
-      var columnLength = 4;
+    it('should not generate diamonds next to each other', async () => {
+      var rowLength = 6;
+      var columnLength = 6;
 
       for (var i = 0; i < 20; i++) {
         const mapService = new MapService();
-        mapService.GenerateNewMap(columnLength, rowLength);
-        let tiles: Tile[] = (<any>mapService)._tiles;
+        mapService.mapGenerationSpeed = 1;
+        await mapService.GenerateNewMap(columnLength, rowLength);
+        let tiles: Tile[] = mapService.Tiles;
         var diamondTiles = tiles.filter(item => item.TileType == TileType.DiamondBlock);
-        //4 by 4 grid allows 4 available spots meaning only two valid that are not touching.
-        expect(diamondTiles.length).toEqual(2);
+        diamondTiles.forEach(tile => {
+          if (mapService.LookInEveryDirection(tile).filter(tile => tile.Tile.TileType == TileType.DiamondBlock).length > 0)
+            fail("Neighbor was diamond");
+        });
       }
     });
   });
@@ -77,7 +82,7 @@ describe('MapService', () => {
       const mapService = new MapService();
       mapService.GenerateNewMap(columnLength, rowLength);
 
-      let tiles: Tile[] = (<any>mapService)._tiles;
+      let tiles: Tile[] = mapService.Tiles;
       let randomTileIndex;
       let tile;
 
@@ -108,7 +113,7 @@ describe('MapService', () => {
       const mapService = new MapService();
       mapService.GenerateNewMap(columnLength, rowLength);
 
-      let tiles: Tile[] = (<any>mapService)._tiles;
+      let tiles: Tile[] = mapService.Tiles;
       let tile = tiles[18];
 
       let lookedAheadTile = mapService.LookAheadByTile(tile, Direction.left);
@@ -121,7 +126,7 @@ describe('MapService', () => {
       const mapService = new MapService();
       mapService.GenerateNewMap(columnLength, rowLength);
 
-      let tiles: Tile[] = (<any>mapService)._tiles;
+      let tiles: Tile[] = mapService.Tiles;
       let tile = tiles[18];
 
       let lookedAheadTile = mapService.LookAheadByTile(tile, Direction.right);
@@ -134,7 +139,7 @@ describe('MapService', () => {
       const mapService = new MapService();
       mapService.GenerateNewMap(columnLength, rowLength);
 
-      let tiles: Tile[] = (<any>mapService)._tiles;
+      let tiles: Tile[] = mapService.Tiles;
       let tile = tiles[18];
 
       let lookedAheadTile = mapService.LookAheadByTile(tile, Direction.up);
@@ -147,7 +152,7 @@ describe('MapService', () => {
       const mapService = new MapService();
       mapService.GenerateNewMap(columnLength, rowLength);
 
-      let tiles: Tile[] = (<any>mapService)._tiles;
+      let tiles: Tile[] = mapService.Tiles;
       let tile = tiles[18];
 
       let lookedAheadTile = mapService.LookAheadByTile(tile, Direction.down);
@@ -163,11 +168,26 @@ describe('MapService', () => {
 
       let tile = mapService.GetTileByIndex(1, 1)
 
-      var neighborTiles = mapService.LookInEveryDirection(tile);
+      var neighborTiles = mapService.LookInEveryDirection(tile).map(item => item.Tile);
       expect(neighborTiles.filter(nT => nT.rowIndex == 1 && nT.columnIndex == 2).length).toEqual(1);
       expect(neighborTiles.filter(nT => nT.rowIndex == 1 && nT.columnIndex == 0).length).toEqual(1);
       expect(neighborTiles.filter(nT => nT.rowIndex == 0 && nT.columnIndex == 1).length).toEqual(1);
       expect(neighborTiles.filter(nT => nT.rowIndex == 2 && nT.columnIndex == 1).length).toEqual(1);
+    });
+  });
+
+  describe("lookDiagnoally", () => {
+    it("should get correct neighbors", () => {
+      const mapService = new MapService();
+      mapService.GenerateNewMap(3, 3);
+
+      let tile = mapService.GetTileByIndex(1, 1)
+
+      var neighborTiles = mapService.LookDiagonally(tile);
+      expect(neighborTiles.filter(nT => nT.rowIndex == 0 && nT.columnIndex == 0).length).toEqual(1);
+      expect(neighborTiles.filter(nT => nT.rowIndex == 0 && nT.columnIndex == 2).length).toEqual(1);
+      expect(neighborTiles.filter(nT => nT.rowIndex == 0 && nT.columnIndex == 0).length).toEqual(1);
+      expect(neighborTiles.filter(nT => nT.rowIndex == 2 && nT.columnIndex == 0).length).toEqual(1);
     });
   });
 });

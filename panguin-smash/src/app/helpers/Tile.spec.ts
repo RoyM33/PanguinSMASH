@@ -13,7 +13,7 @@ describe('Tile', () => {
         TestBed.configureTestingModule({
             providers: [{ provide: MapService, useValue: MockMapService }]
         });
-        var tiles: Tile[] = (<any>MockMapService)._tiles;
+        let tiles: Tile[] = MockMapService.Tiles;
         tiles.forEach(tile => {
             tile.TileType = TileType.Floor;
         });
